@@ -5,6 +5,8 @@
  */
 
 import PriorityQueue from 'js-priority-queue';
+import CancelledCommandException from './CancelledCommandException';
+
 import WMTSProvider from '../../Provider/WMTSProvider';
 import WMSProvider from '../../Provider/WMSProvider';
 import TileProvider from '../../Provider/TileProvider';
@@ -14,7 +16,17 @@ import PointCloudProvider from '../../Provider/PointCloudProvider';
 import WFSProvider from '../../Provider/WFSProvider';
 import RasterProvider from '../../Provider/RasterProvider';
 import StaticProvider from '../../Provider/StaticProvider';
-import CancelledCommandException from './CancelledCommandException';
+import FileProvider from '../../Provider/FileProvider';
+
+import GpxParser from '../../Parser/GpxParser';
+import XbilParser from '../../Parser/XbilParser';
+import GeoJsonParser from '../../Parser/GeoJsonParser';
+import PntsParser from '../../Parser/PntsParser';
+import B3dmParser from '../../Parser/B3dmParser';
+import PotreeBinParser from '../../Parser/PotreeBinParser';
+import PotreeCinParser from '../../Parser/PotreeCinParser';
+// import GLTFLoader from '../../Parser/GLTFLoader';
+// import LegacyGLTFLoader from '../../Parser/LegacyGLTFLoader';
 
 var instanceScheduler = null;
 
@@ -76,12 +88,14 @@ function Scheduler() {
     this.hostQueues = new Map();
 
     this.providers = {};
+    this.parsers = {};
 
     this.maxConcurrentCommands = 16;
     this.maxCommandsPerHost = 6;
 
     // TODO: add an options to not instanciate default providers
     this.initDefaultProviders();
+    this.initDefaultParsers();
 }
 
 Scheduler.prototype.constructor = Scheduler;
@@ -99,6 +113,21 @@ Scheduler.prototype.initDefaultProviders = function initDefaultProviders() {
     this.addProtocolProvider('wfs', WFSProvider);
     this.addProtocolProvider('rasterizer', RasterProvider);
     this.addProtocolProvider('static', StaticProvider);
+    this.addProtocolProvider('file', FileProvider);
+};
+
+Scheduler.prototype.initDefaultParsers = function initDefaultParsers() {
+    // Register all parsers
+    this.addFormatParser('gpx', GpxParser);
+    this.addFormatParser('xbil', XbilParser);
+    this.addFormatParser('application/json', GeoJsonParser);
+    this.addFormatParser('geojson', GeoJsonParser);
+    this.addFormatParser('pnts', PntsParser);
+    this.addFormatParser('b3dm', B3dmParser);
+    this.addFormatParser('bin', PotreeBinParser);
+    this.addFormatParser('cin', PotreeCinParser);
+    // this.addFormatParser('gltf', GLTFLoader);
+    // this.addFormatParser('gltf-legacy', LegacyGLTFLoader);
 };
 
 Scheduler.prototype.runCommand = function runCommand(command, queue, executingCounterUpToDate) {
@@ -175,6 +204,18 @@ Scheduler.prototype.getProtocolProvider = function getProtocolProvider(protocol)
     return this.providers[protocol];
 };
 
+
+Scheduler.prototype.addFormatParser = function addParser(format, parser) {
+    if (typeof (parser.parse) !== 'function') {
+        throw new Error(`Can't add parser for ${format}: missing a parse function.`);
+    }
+    this.parsers[format] = parser;
+};
+
+Scheduler.prototype.getFormatParser = function getFormatParser(format) {
+    return this.parsers[format];
+};
+
 Scheduler.prototype.commandsWaitingExecutionCount = function commandsWaitingExecutionCount() {
     let sum = this.defaultQueue.storage.length + this.defaultQueue.counters.executing;
     for (var q of this.hostQueues) {
@@ -203,7 +244,11 @@ Scheduler.prototype.resetCommandsCount = function resetCommandsCount(type) {
 };
 
 Scheduler.prototype.getProviders = function getProviders() {
-    return this.providers.slice();
+    return this.providers;
+};
+
+Scheduler.prototype.getParsers = function getParsers() {
+    return this.parsers;
 };
 
 Scheduler.prototype.deQueue = function deQueue(queue) {
