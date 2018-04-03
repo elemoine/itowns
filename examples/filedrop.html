@@ -50,26 +50,23 @@
             promises.push(itowns.Fetcher.json('./layers/JSONLayers/WORLD_DTM.json').then(addLayerCb));
             promises.push(itowns.Fetcher.json('./layers/JSONLayers/IGN_MNT_HIGHRES.json').then(addLayerCb));
 
-            
-            function prevDefault(e){ e.preventDefault(); }
-            viewerDiv.addEventListener('dragenter', prevDefault, false);
-            viewerDiv.addEventListener('dragover', prevDefault, false);
-            viewerDiv.addEventListener('dragleave', prevDefault, false);
-            viewerDiv.addEventListener('drop', function(e) {
-                e.preventDefault();
-                var files = e.dataTransfer.files;
+            function addFiles(event, dataTransfer) {
+                event.preventDefault();
+                var files = dataTransfer.files;
                 for (var i = 0; i < files.length; i++) {
                     var file = files[i];
                     console.log(file);
-                    globeView.addLayer({
-                        protocol: 'file',
-                        id: file.name,
-                        file: file,
-                        crs: globeView.referenceCrs,
-                        parsers: globeView.mainLoop.scheduler.getParsers()
-                    });
+                    globeView.addLayer({ protocol: 'file', file, id: file.name, options: { event, altitude: 500} });
                 }
-            }, false);
+            }
+
+            function prevDefault(event){ event.preventDefault(); }
+            viewerDiv.addEventListener('dragenter', prevDefault, false);
+            viewerDiv.addEventListener('dragover', prevDefault, false);
+            viewerDiv.addEventListener('dragleave', prevDefault, false);
+            viewerDiv.addEventListener('drop',  function(e) { addFiles(e, e.dataTransfer); }, false);
+            viewerDiv.addEventListener('paste', function(e) { addFiles(e, e.clipboardData); }, false);
+
         </script>
     </body>
 </html>

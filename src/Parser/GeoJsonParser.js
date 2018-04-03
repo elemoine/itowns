@@ -258,7 +258,7 @@ export default {
      * Parse a GeoJSON file content and return a Feature or an array of Features.
      * @param {string} json - The GeoJSON file content to parse.
      * @param {object} options - options controlling the parsing
-     * @param {string} options.crsOut - The CRS to convert the input coordinates to.
+     * @param {string} options.crs - The CRS to convert the input coordinates to.
      * @param {string} options.crsIn - override the data crs
      * @param {Extent=} options.filteringExtent - Optional filter to reject features
      * outside of this extent.
@@ -268,7 +268,7 @@ export default {
      * @returns {Promise} - a promise resolving with a Feature or an array of Features
      */
     parse(json, options = {}) {
-        const crsOut = options.crsOut;
+        const crsOut = options.crs;
         const filteringExtent = options.filteringExtent;
         if (typeof (json) === 'string') {
             json = JSON.parse(json);
