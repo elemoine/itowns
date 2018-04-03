@@ -24,5 +24,5 @@ export default {
         return readFile(file).then(content => parser.parse(content, layer)).then((obj) => { layer.object3d.add(obj); });
     },
 
-    executeCommand(command) {},
+    executeCommand(/* command */) {},
 };
