@@ -55,9 +55,23 @@ export const defineLayerProperty = function defineLayerProperty(layer, propertyN
     }
 };
 
-function GeometryLayer(id, object3d) {
+function changeOpacity(obj, layer) {
+    if (obj.material) {
+        // != undefined: we want the test to pass if opacity is 0
+        if (obj.material.opacity != undefined) {
+            obj.material.transparent = layer.opacity < 1.0;
+            obj.material.opacity = layer.opacity;
+        }
+        if (obj.material.uniforms && obj.material.uniforms.opacity != undefined) {
+            obj.material.transparent = layer.opacity < 1.0;
+            obj.material.uniforms.opacity.value = layer.opacity;
+        }
+    }
+}
+
+function RootLayer(id, object3d) {
     if (!id) {
-        throw new Error('Missing id parameter (GeometryLayer must have a unique id defined)');
+        throw new Error('Missing id parameter (RootLayer must have a unique id defined)');
     }
     if (!object3d || !object3d.isObject3D) {
         throw new Error('Missing/Invalid object3d parameter (must be a three.js Object3D instance)');
@@ -78,23 +92,35 @@ function GeometryLayer(id, object3d) {
         writable: false,
     });
 
+    defineLayerProperty(this, 'opacity', 1.0, (layer) => {
+        layer.object3d.traverse((obj) => {
+            if (obj.layer !== layer.id) {
+                return;
+            }
+            changeOpacity(obj, layer);
+            if (obj.content) {
+                obj.content.traverse(o => changeOpacity(o, layer));
+            }
+        });
+    });
+
     // Setup default picking method
     this.pickObjectsAt = (view, mouse) => Picking.pickObjectsAt(view, mouse, this.object3d);
 
     this.postUpdate = () => {};
 }
 
-GeometryLayer.prototype = Object.create(EventDispatcher.prototype);
-GeometryLayer.prototype.constructor = GeometryLayer;
+RootLayer.prototype = Object.create(EventDispatcher.prototype);
+RootLayer.prototype.constructor = RootLayer;
 
-GeometryLayer.prototype.attach = function attach(layer) {
+RootLayer.prototype.attach = function attach(layer) {
     if (!layer.update) {
         throw new Error(`Missing 'update' function -> can't attach layer ${layer.id}`);
     }
     this._attachedLayers.push(layer);
 };
 
-GeometryLayer.prototype.detach = function detach(layer) {
+RootLayer.prototype.detach = function detach(layer) {
     const count = this._attachedLayers.length;
     this._attachedLayers = this._attachedLayers.filter(attached => attached.id != layer.id);
     return this._attachedLayers.length < count;
@@ -204,4 +230,4 @@ const ImageryLayers = {
     },
 };
 
-export { GeometryLayer, Layer, ImageryLayers };
+export { RootLayer, Layer, ImageryLayers };

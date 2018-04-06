@@ -6,7 +6,7 @@ import { COLOR_LAYERS_ORDER_CHANGED } from '../../Renderer/ColorLayersOrdering';
 import RendererConstant from '../../Renderer/RendererConstant';
 import GlobeControls from '../../Renderer/ThreeExtended/GlobeControls';
 
-import { GeometryLayer } from '../Layer/Layer';
+import { RootLayer } from '../Layer/Layer';
 
 import Atmosphere from './Globe/Atmosphere';
 import CoordStars from '../Geographic/CoordStars';
@@ -106,7 +106,7 @@ export function createGlobeLayer(id, options) {
         }
     }
 
-    const wgs84TileLayer = new GeometryLayer(id, options.object3d || new THREE.Group());
+    const wgs84TileLayer = new RootLayer(id, options.object3d || new THREE.Group());
     wgs84TileLayer.schemeTile = globeSchemeTileWMTS(globeSchemeTile1);
     wgs84TileLayer.extent = wgs84TileLayer.schemeTile[0].clone();
     for (let i = 1; i < wgs84TileLayer.schemeTile.length; i++) {

@@ -2,7 +2,7 @@ import * as THREE from 'three';
 
 import View from '../View';
 
-import { GeometryLayer } from '../Layer/Layer';
+import { RootLayer } from '../Layer/Layer';
 import Extent from '../Geographic/Extent';
 import { processTiledGeometryNode } from '../../Process/TiledNodeProcessing';
 import { updateLayeredMaterialNodeImagery } from '../../Process/LayeredMaterialNodeProcessing';
@@ -13,7 +13,7 @@ import ProjectionType from './Panorama/Constants';
 import Picking from '../Picking';
 
 export function createPanoramaLayer(id, coordinates, type, options = {}) {
-    const tileLayer = new GeometryLayer(id, options.object3d || new THREE.Group());
+    const tileLayer = new RootLayer(id, options.object3d || new THREE.Group());
 
     coordinates.xyz(tileLayer.object3d.position);
     tileLayer.object3d.quaternion.setFromUnitVectors(

@@ -62,7 +62,7 @@ function colorLine(properties) {
     return new itowns.THREE.Color(rgb[0] / 255, rgb[1] / 255, rgb[2] / 255);
 }
 
-view.addLayer({
+view.addLayer(new itowns.GeometryLayer({
     name: 'lyon_tcl_bus',
     update: itowns.FeatureProcessing.update,
     convert: itowns.Feature2Mesh.convert({
@@ -82,7 +82,7 @@ view.addLayer({
         north: 5205890.19,
     },
     format: 'geojson',
-}, view.tileLayer);
+}), view.tileLayer);
 
 function colorBuildings(properties) {
     if (properties.id.indexOf('bati_remarquable') === 0) {
@@ -114,8 +114,7 @@ function scaler(/* dt */) {
 }
 
 view.addFrameRequester(itowns.MAIN_LOOP_EVENTS.BEFORE_RENDER, scaler);
-view.addLayer({
-    type: 'geometry',
+view.addLayer(new itowns.GeometryLayer({
     update: itowns.FeatureProcessing.update,
     convert: itowns.Feature2Mesh.convert({
         color: colorBuildings,
@@ -138,9 +137,9 @@ view.addLayer({
         south: 45.437,
         north: 46.03,
     },
-    ipr: 'IGN',
+    ipr: 'IGN', // FIXME
     format: 'application/json',
-}, view.tileLayer);
+}), view.tileLayer);
 
 function configPointMaterial(result) {
     var i = 0;
@@ -160,8 +159,7 @@ function colorPoint(properties) {
     return new itowns.THREE.Color(0xFFB300);
 }
 
-view.addLayer({
-    type: 'geometry',
+view.addLayer(new itowns.GeometryLayer({
     update: itowns.FeatureProcessing.update,
     convert: itowns.Feature2Mesh.convert({
         altitude: 0,
@@ -177,5 +175,5 @@ view.addLayer({
     projection: 'EPSG:2154',
     ipr: 'IGN',
     format: 'application/json',
-}, view.tileLayer);
+}), view.tileLayer);
 exports.view = view;
