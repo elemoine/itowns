@@ -24,10 +24,9 @@ setupLoadingScreen(viewerDiv, view);
 view.tileLayer.disableSkirt = true;
 
 // Add an WMS imagery layer (see WMSProvider* for valid options)
-view.addLayer({
+view.addLayer(new itowns.ColorLayer({
     url: 'https://download.data.grandlyon.com/wms/grandlyon',
     networkOptions: { crossOrigin: 'anonymous' },
-    type: 'color',
     protocol: 'wms',
     version: '1.3.0',
     id: 'wms_imagery',
@@ -35,12 +34,11 @@ view.addLayer({
     projection: 'EPSG:3946',
     transparent: true,
     format: 'image/jpeg',
-});
+}));
 
 // Add an WMS elevation layer (see WMSProvider* for valid options)
-view.addLayer({
+view.addLayer(new itowns.ColorLayer({
     url: 'https://download.data.grandlyon.com/wms/grandlyon',
-    type: 'elevation',
     protocol: 'wms',
     networkOptions: { crossOrigin: 'anonymous' },
     version: '1.3.0',
@@ -49,20 +47,18 @@ view.addLayer({
     projection: view.referenceCrs,
     heightMapWidth: 256,
     format: 'image/jpeg',
-});
+}));
 
-view.addLayer({
-    type: 'color',
+view.addLayer(new itowns.ColorLayer({
     url: 'https://raw.githubusercontent.com/iTowns/iTowns2-sample-data/master/lyon.kml',
     protocol: 'rasterizer',
     id: 'Kml',
     extent: extent,
     transparent: true,
     options: { zoom: { min: 0, max: 6 } },
-});
+}));
 
-view.addLayer({
-    type: 'color',
+view.addLayer(new itowns.ColorLayer({
     url: 'https://raw.githubusercontent.com/iTowns/iTowns2-sample-data/master/lyon.gpx',
     protocol: 'rasterizer',
     options: { zoom: { min: 0, max: 6 } },
@@ -71,10 +67,9 @@ view.addLayer({
     style: {
         stroke: 'blue',
     },
-});
+}));
 
-view.addLayer({
-    type: 'color',
+view.addLayer(new itowns.ColorLayer({
     url: 'https://raw.githubusercontent.com/iTowns/iTowns2-sample-data/master/lyon.geojson',
     protocol: 'rasterizer',
     projection: 'EPSG:3946',
@@ -87,7 +82,7 @@ view.addLayer({
         fillOpacity: 0.2,
         stroke: 'white',
     },
-});
+}));
 
 // Since the elevation layer use color textures, specify min/max z
 view.tileLayer.materialOptions = {

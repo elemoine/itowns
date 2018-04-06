@@ -20,7 +20,13 @@ function showPointcloud(serverUrl, fileName) {
     setupLoadingScreen(viewerDiv, view);
 
     view.controls.minDistance = 0;
-    function addLayerCb(layer) {
+    function addLayerCb(layerOptions) {
+        var layer, type = layerOptions.type;
+        if (type == 'color') {
+            layer = new itowns.ColorLayer(layerOptions);
+        } else if (type ==  'elevation') {
+            layer = new itowns.ElevationLayer(layerOptions);
+        }
         return view.addLayer(layer);
     }
 

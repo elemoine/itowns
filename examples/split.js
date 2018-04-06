@@ -20,7 +20,13 @@ var xD;
 
 setupLoadingScreen(viewerDiv, globeView);
 
-function addLayerCb(layer) {
+function addLayerCb(layerOptions) {
+    var layer, type = layerOptions.type;
+    if (type == 'color') {
+        layer = new itowns.ColorLayer(layerOptions);
+    } else if (type ==  'elevation') {
+        layer = new itowns.ElevationLayer(layerOptions);
+    }
     return globeView.addLayer(layer);
 }
 // Add one imagery layer to the scene

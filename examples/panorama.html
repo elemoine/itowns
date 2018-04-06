@@ -70,18 +70,17 @@
                     var pano = panoramas[i];
                     var url = new URL(pano['images'], urls[index]);
                     var _id = url.pathname;
-                    view.addLayer({
+                    view.addLayer(new itowns.ColorLayer({
                         visible: index == activeIndex,
                         url: url.href,
                         networkOptions: { crossOrigin: 'anonymous' },
-                        type: 'color',
                         protocol: 'static',
                         id: _id,
                         projection: 'EPSG:4326',
                         updateStrategy: {
                             type: itowns.STRATEGY_DICHOTOMY,
                         }
-                    }).then(function _() {
+                    })).then(function _() {
                         view.notifyChange(false);
                     });
 

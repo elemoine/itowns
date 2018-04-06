@@ -15,7 +15,14 @@ var miniDiv = document.getElementById('miniDiv');
 // Instanciate iTowns GlobeView*
 var globeView = new itowns.GlobeView(viewerDiv, positionOnGlobe, { renderer: renderer });
 setupLoadingScreen(viewerDiv, globeView);
-function addLayerCb(layer) {
+
+function addLayerCb(layerOptions) {
+    var layer, type = layerOptions.type;
+    if (type == 'color') {
+        layer = new itowns.ColorLayer(layerOptions);
+    } else if (type ==  'elevation') {
+        layer = new itowns.ElevationLayer(layerOptions);
+    }
     return globeView.addLayer(layer);
 }
 
@@ -49,7 +56,11 @@ if (!renderer) {
     });
 
     // Add one imagery layer to the miniview
-    itowns.Fetcher.json('./layers/JSONLayers/Ortho.json').then(function _(layer) { miniView.addLayer(layer); });
+    itowns.Fetcher.json('./layers/JSONLayers/Ortho.json').then(
+        function _(layerOptions) {
+            miniView.addLayer(new itowns.ColorLayer(layerOptions));
+        }
+    );
 }
 
 // Add one imagery layer to the scene

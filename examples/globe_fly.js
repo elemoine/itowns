@@ -18,7 +18,13 @@ setupLoadingScreen(viewerDiv, globeView);
 // Add one imagery layer to the scene
 // This layer is defined in a json file but it could be defined as a plain js
 // object. See Layer* for more info.
-function addLayer(layer) {
+function addLayer(layerOptions) {
+    var layer, type = layerOptions.type;
+    if (type == 'color') {
+        layer = new itowns.ColorLayer(layerOptions);
+    } else if (type ==  'elevation') {
+        layer = new itowns.ElevationLayer(layerOptions);
+    }
     return globeView.addLayer(layer);
 }
 promises.push(itowns.Fetcher.json('./layers/JSONLayers/Ortho.json').then(addLayer));
