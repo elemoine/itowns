@@ -24,10 +24,9 @@ setupLoadingScreen(viewerDiv, view);
 view.tileLayer.disableSkirt = true;
 
 // Add an WMS imagery layer (see WMSProvider* for valid options)
-view.addLayer({
+view.addLayer(new itowns.ColorLayer({
     url: 'https://download.data.grandlyon.com/wms/grandlyon',
     networkOptions: { crossOrigin: 'anonymous' },
-    type: 'color',
     protocol: 'wms',
     version: '1.3.0',
     id: 'wms_imagery',
@@ -38,12 +37,11 @@ view.addLayer({
         type: itowns.STRATEGY_DICHOTOMY,
         options: {},
     },
-});
+}));
 
 // Add an WMS elevation layer (see WMSProvider* for valid options)
-view.addLayer({
+view.addLayer(new itowns.ElevationLayer({
     url: 'https://download.data.grandlyon.com/wms/grandlyon',
-    type: 'elevation',
     protocol: 'wms',
     networkOptions: { crossOrigin: 'anonymous' },
     id: 'wms_elevation',
@@ -51,7 +49,7 @@ view.addLayer({
     projection: 'EPSG:3946',
     heightMapWidth: 256,
     format: 'image/jpeg',
-});
+}));
 // Since the elevation layer use color textures, specify min/max z
 view.tileLayer.materialOptions = {
     useColorTextureElevation: true,

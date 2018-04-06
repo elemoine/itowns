@@ -3,7 +3,6 @@ import { Scene, EventDispatcher, Vector2, Object3D } from 'three';
 import Camera from '../Renderer/Camera';
 import MainLoop, { MAIN_LOOP_EVENTS, RENDERING_PAUSED } from './MainLoop';
 import c3DEngine from '../Renderer/c3DEngine';
-import { STRATEGY_MIN_NETWORK_TRAFFIC } from './Layer/LayerUpdateStrategy';
 import { GeometryLayer, Layer, defineLayerProperty } from './Layer/Layer';
 import Scheduler from './Scheduler/Scheduler';
 import Picking from './Picking';
@@ -105,34 +104,10 @@ const _syncGeometryLayerVisibility = function _syncGeometryLayerVisibility(layer
 };
 
 function _preprocessLayer(view, layer, provider, parentLayer) {
-    if (!(layer instanceof Layer) && !(layer instanceof GeometryLayer)) {
-        const nlayer = new Layer(layer.id);
-        // nlayer.id is read-only so delete it from layer before Object.assign
-        const tmp = layer;
-        delete tmp.id;
-        layer = Object.assign(nlayer, layer);
-        // restore layer.id in user provider layer object
-        tmp.id = layer.id;
-    }
-
-    layer.options = layer.options || {};
-    // TODO remove this warning and fallback after the release following v2.3.0
-    if (!layer.format && layer.options.mimetype) {
-        console.warn('layer.options.mimetype is deprecated, please use layer.format');
-        layer.format = layer.options.mimetype;
-    }
-
-    if (!layer.updateStrategy) {
-        layer.updateStrategy = {
-            type: STRATEGY_MIN_NETWORK_TRAFFIC,
-        };
-    }
-
     if (provider) {
         if (provider.tileInsideLimit) {
             layer.tileInsideLimit = provider.tileInsideLimit.bind(provider);
         }
-
         if (provider.tileTextureCount) {
             layer.tileTextureCount = provider.tileTextureCount.bind(provider);
         }
@@ -148,12 +123,12 @@ function _preprocessLayer(view, layer, provider, parentLayer) {
         }
         let providerPreprocessing = Promise.resolve();
         if (provider && provider.preprocessDataLayer) {
-            providerPreprocessing = provider.preprocessDataLayer(layer, view, view.mainLoop.scheduler, parentLayer);
+            providerPreprocessing = provider.preprocessDataLayer(
+                layer, view, view.mainLoop.scheduler, parentLayer);
             if (!(providerPreprocessing && providerPreprocessing.then)) {
                 providerPreprocessing = Promise.resolve();
             }
         }
-
         // the last promise in the chain must return the layer
         layer.whenReady = providerPreprocessing.then(() => {
             layer.ready = true;
@@ -161,16 +136,9 @@ function _preprocessLayer(view, layer, provider, parentLayer) {
         });
     }
 
-    // probably not the best place to do this
-    if (layer.type == 'color') {
-        defineLayerProperty(layer, 'frozen', false);
-        defineLayerProperty(layer, 'visible', true);
-        defineLayerProperty(layer, 'opacity', 1.0);
-        defineLayerProperty(layer, 'sequence', 0);
-    } else if (layer.type == 'elevation') {
-        defineLayerProperty(layer, 'frozen', false);
-    } else if (layer.type == 'geometry' || layer.type == 'debug') {
-        defineLayerProperty(layer, 'visible', true, () => _syncGeometryLayerVisibility(layer, view));
+    if (layer.type == 'geometry' || layer.type == 'debug') {
+        defineLayerProperty(layer, 'visible', true,
+                            () => _syncGeometryLayerVisibility(layer, view));
         defineLayerProperty(layer, 'frozen', false);
         _syncGeometryLayerVisibility(layer, view);
 
@@ -202,6 +170,7 @@ function _preprocessLayer(view, layer, provider, parentLayer) {
             }
         });
     }
+
     return layer;
 }
 

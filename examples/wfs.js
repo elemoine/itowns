@@ -27,10 +27,9 @@ setupLoadingScreen(viewerDiv, view);
 view.tileLayer.disableSkirt = true;
 
 // Add an WMS imagery layer (see WMSProvider* for valid options)
-view.addLayer({
+view.addLayer(new itowns.ColorLayer({
     url: 'https://download.data.grandlyon.com/wms/grandlyon',
     networkOptions: { crossOrigin: 'anonymous' },
-    type: 'color',
     protocol: 'wms',
     version: '1.3.0',
     id: 'wms_imagery',
@@ -39,7 +38,7 @@ view.addLayer({
     transparent: false,
     extent: extent,
     format: 'image/jpeg',
-});
+}));
 
 view.camera.camera3D.position.set(1839739, 5171618, 910);
 view.camera.camera3D.lookAt(new itowns.THREE.Vector3(1840839, 5172718, 0));

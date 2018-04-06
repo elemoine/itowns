@@ -46,8 +46,7 @@ setupLoadingScreen(viewerDiv, view);
 view.tileLayer.disableSkirt = true;
 
 // Add an TMS imagery layer
-view.addLayer({
-    type: 'color',
+view.addLayer(new itowns.ColorLayer({
     protocol: 'xyz',
     id: 'OPENSM',
     // eslint-disable-next-line no-template-curly-in-string
@@ -64,7 +63,7 @@ view.addLayer({
     updateStrategy: {
         type: itowns.STRATEGY_DICHOTOMY,
     },
-});
+}));
 
 viewerDiv.addEventListener('DOMMouseScroll', onMouseWheel);
 viewerDiv.addEventListener('mousewheel', onMouseWheel);

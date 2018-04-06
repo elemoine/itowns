@@ -1,5 +1,6 @@
 import { EventDispatcher } from 'three';
 import Picking from '../Picking';
+import { STRATEGY_MIN_NETWORK_TRAFFIC } from './LayerUpdateStrategy';
 
 /**
  * Fires when layer sequence change (meaning when the order of the layer changes in the view)
@@ -122,17 +123,41 @@ GeometryLayer.prototype.detach = function detach(layer) {
  * layerToListen.addEventListener('opacity-property-changed', (event) => console.log(event));
  * @constructor
  * @protected
- * @param      {String}  id
+ * @param      {Object}  options
  */
-function Layer(id) {
+function Layer(options) {
+    var extraOptions = options.options || {};
+    var format = options.format;
+
+    if (!format && extraOptions.mimetype) {
+        console.warn('layer.options.mimetype is deprecated, please use layer.format');
+        format = extraOptions.mimetype;
+    }
+
+    this.extent = options.extent;
+    this.format = format;
+    this.name = options.name;
+    this.networkOptions = options.networkOptions;
+    this.options = extraOptions;
+    this.projection = options.projection;
+    this.protocol = options.protocol;
+    this.ready = false;
+    this.tileInsideLimit = undefined;
+    this.tileTextureCount = undefined;
+    this.update = options.update;
+    this.updateStrategy = options.updateStrategy || { type: STRATEGY_MIN_NETWORK_TRAFFIC };
+    this.url = options.url;
+    this.whenReady = options.whenReady;
+
     Object.defineProperty(this, 'id', {
-        value: id,
+        value: options.id,
         writable: false,
     });
 }
 
 Layer.prototype = Object.create(EventDispatcher.prototype);
 Layer.prototype.constructor = Layer;
+
 
 const ImageryLayers = {
     // move layer to new index

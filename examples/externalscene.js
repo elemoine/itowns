@@ -15,8 +15,16 @@ function addLayerCb(layer) {
     return globeView.addLayer(layer);
 }
 
-itowns.Fetcher.json('./layers/JSONLayers/Ortho.json').then(addLayerCb);
-itowns.Fetcher.json('./layers/JSONLayers/IGN_MNT.json').then(addLayerCb);
+itowns.Fetcher.json('./layers/JSONLayers/Ortho.json').then(
+    function(layerOptions) {
+        globeView.addLayer(new itowns.ColorLayer(layerOptions));
+    }
+);
+itowns.Fetcher.json('./layers/JSONLayers/IGN_MNT.json').then(
+    function(layerOptions) {
+        globeView.addLayer(new itowns.ElevationLayer(layerOptions));
+    }
+);
 
 exports.globeView = globeView;
 exports.scene = scene;

@@ -64,10 +64,10 @@
             setupLoadingScreen(viewerDiv, globeView);
             layers.push(globeView.wgs84TileLayer);
 
-            function addLayerCb(layer) {
-                return globeView.addLayer(layer);
+            function addLayer(layerOptions) {
+                return globeView.addLayer(new itowns.ColorLayer(layerOptions));
             }
-            itowns.Fetcher.json('./layers/JSONLayers/Ortho.json').then(addLayerCb);
+            itowns.Fetcher.json('./layers/JSONLayers/Ortho.json').then(addLayer);
 
             // create a second smaller globe
             const globe2 = itowns.createGlobeLayer('globe2', { object3d: ref[1] });
@@ -78,9 +78,10 @@
 
             // add it to the view so it gets updated
             itowns.View.prototype.addLayer.call(globeView, globe2);
-            itowns.Fetcher.json('./layers/JSONLayers/OPENSM.json').then(function _(osm) {
-                osm.update = itowns.updateLayeredMaterialNodeImagery;
-                itowns.View.prototype.addLayer.call(globeView, osm, globe2);
+            itowns.Fetcher.json('./layers/JSONLayers/OPENSM.json').then(function _(layerOptions) {
+                layerOptions.update = itowns.updateLayeredMaterialNodeImagery;
+                var osmLayer = new itowns.ColorLayer(layerOptions);
+                itowns.View.prototype.addLayer.call(globeView, osmLayer, globe2);
             });
 
             // Globe animation

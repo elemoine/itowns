@@ -18,7 +18,13 @@ var menuGlobe = new GuiTools('menuDiv', globeView);
 
 var promiseElevation = [];
 
-function addLayerCb(layer) {
+function addLayerCb(layerOptions) {
+    var layer, type = layerOptions.type;
+    if (type == 'color') {
+        layer = new itowns.ColorLayer(layerOptions);
+    } else if (type == 'elevation') {
+        layer = new itowns.ElevationLayer(layerOptions);
+    }
     return globeView.addLayer(layer).then(function addGui(la) {
         if (la.type === 'color') {
             menuGlobe.addImageryLayerGUI(la);
