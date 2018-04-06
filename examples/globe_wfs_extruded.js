@@ -74,9 +74,8 @@ function acceptFeatureBus(properties) {
     return false;
 }
 
-globeView.addLayer({
+globeView.addLayer(new itowns.GeometryLayer({
     name: 'lyon_tcl_bus',
-    type: 'geometry',
     update: itowns.FeatureProcessing.update,
     convert: itowns.Feature2Mesh.convert({
         color: colorLine,
@@ -97,7 +96,7 @@ globeView.addLayer({
         north: 5205890.19,
     },
     format: 'geojson',
-});
+}));
 
 function colorBuildings(properties) {
     if (properties.id.indexOf('bati_remarquable') === 0) {
@@ -138,8 +137,7 @@ scaler = function update(/* dt */) {
 };
 
 globeView.addFrameRequester(itowns.MAIN_LOOP_EVENTS.BEFORE_RENDER, scaler);
-globeView.addLayer({
-    type: 'geometry',
+globeView.addLayer(new itowns.GeometryLayer({
     update: itowns.FeatureProcessing.update,
     convert: itowns.Feature2Mesh.convert({
         color: colorBuildings,
@@ -158,9 +156,9 @@ globeView.addLayer({
     typeName: 'BDTOPO_BDD_WLD_WGS84G:bati_remarquable,BDTOPO_BDD_WLD_WGS84G:bati_indifferencie,BDTOPO_BDD_WLD_WGS84G:bati_industriel',
     level: 14,
     projection: 'EPSG:4326',
-    ipr: 'IGN',
+    ipr: 'IGN', // FIXME
     format: 'application/json',
-});
+}));
 
 function configPointMaterial(result) {
     var i = 0;
@@ -193,8 +191,7 @@ function altitudePoint(properties, contour) {
     return 0;
 }
 
-globeView.addLayer({
-    type: 'geometry',
+globeView.addLayer(new itowns.GeometryLayer({
     update: itowns.FeatureProcessing.update,
     convert: itowns.Feature2Mesh.convert({
         altitude: altitudePoint,
@@ -210,9 +207,9 @@ globeView.addLayer({
     typeName: 'BDPR_BDD_FXX_LAMB93_20170911:pr',
     level: 12,
     projection: 'EPSG:2154',
-    ipr: 'IGN',
+    ipr: 'IGN', // FIXME
     format: 'application/json',
-});
+}));
 
 exports.view = globeView;
 exports.initialPosition = positionOnGlobe;

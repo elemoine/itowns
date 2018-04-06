@@ -3,7 +3,7 @@ import { Scene, EventDispatcher, Vector2, Object3D } from 'three';
 import Camera from '../Renderer/Camera';
 import MainLoop, { MAIN_LOOP_EVENTS, RENDERING_PAUSED } from './MainLoop';
 import c3DEngine from '../Renderer/c3DEngine';
-import { GeometryLayer, Layer, defineLayerProperty } from './Layer/Layer';
+import { RootLayer, Layer, defineLayerProperty } from './Layer/Layer';
 import Scheduler from './Scheduler/Scheduler';
 import Picking from './Picking';
 
@@ -141,34 +141,6 @@ function _preprocessLayer(view, layer, provider, parentLayer) {
                             () => _syncGeometryLayerVisibility(layer, view));
         defineLayerProperty(layer, 'frozen', false);
         _syncGeometryLayerVisibility(layer, view);
-
-        const changeOpacity = (o) => {
-            if (o.material) {
-                // != undefined: we want the test to pass if opacity is 0
-                if (o.material.opacity != undefined) {
-                    o.material.transparent = layer.opacity < 1.0;
-                    o.material.opacity = layer.opacity;
-                }
-                if (o.material.uniforms && o.material.uniforms.opacity != undefined) {
-                    o.material.transparent = layer.opacity < 1.0;
-                    o.material.uniforms.opacity.value = layer.opacity;
-                }
-            }
-        };
-        defineLayerProperty(layer, 'opacity', 1.0, () => {
-            if (layer.object3d) {
-                layer.object3d.traverse((o) => {
-                    if (o.layer !== layer.id) {
-                        return;
-                    }
-                    changeOpacity(o);
-                    // 3dtiles layers store scenes in children's content property
-                    if (o.content) {
-                        o.content.traverse(changeOpacity);
-                    }
-                });
-            }
-        });
     }
 
     return layer;
@@ -263,7 +235,7 @@ function _preprocessLayer(view, layer, provider, parentLayer) {
  * // One can also attach a callback to the same promise with a layer instance.
  * layer.whenReady.then(() => { ... });
  *
- * @param {LayerOptions|Layer|GeometryLayer} layer
+ * @param {LayerOptions|Layer|RootLayer} layer
  * @param {Layer=} parentLayer
  * @return {Promise} a promise resolved with the new layer object when it is fully initialized
  */
@@ -286,10 +258,10 @@ View.prototype.addLayer = function addLayer(layer, parentLayer) {
         parentLayer.attach(layer);
     } else {
         if (typeof (layer.update) !== 'function') {
-            throw new Error('Cant add GeometryLayer: missing a update function');
+            throw new Error('Cant add RootLayer: missing a update function');
         }
         if (typeof (layer.preUpdate) !== 'function') {
-            throw new Error('Cant add GeometryLayer: missing a preUpdate function');
+            throw new Error('Cant add RootLayer: missing a preUpdate function');
         }
 
         this._layers.push(layer);
@@ -551,7 +523,7 @@ View.prototype.pickObjectsAt = function pickObjectsAt(mouseOrEvt, ...where) {
     const mouse = (mouseOrEvt instanceof Event) ? this.eventToViewCoords(mouseOrEvt) : mouseOrEvt;
 
     for (const source of sources) {
-        if (source instanceof GeometryLayer ||
+        if (source instanceof RootLayer ||
             source instanceof Layer ||
             typeof (source) === 'string') {
             const layer = (typeof (source) === 'string') ?

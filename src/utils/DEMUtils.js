@@ -14,7 +14,7 @@ const PRECISE_READ_Z = 1;
 export default {
     /**
      * Return current displayed elevation at coord in meters.
-     * @param {GeometryLayer} layer The tile layer owning the elevation textures we're going to query.
+     * @param {RootLayer} layer The tile layer owning the elevation textures we're going to query.
      * This is typically the globeLayer or a planeLayer.
      * @param {Coordinates} coord The coordinates that we're interested in
      * @param {Number} method 2 available method: FAST_READ_Z (default) or PRECISE_READ_Z. Chosing between
@@ -32,7 +32,7 @@ export default {
 
     /**
      * Helper method that will position an object directly on the ground.
-     * @param {GeometryLayer} layer The tile layer owning the elevation textures we're going to query.
+     * @param {RootLayer} layer The tile layer owning the elevation textures we're going to query.
      * This is typically the globeLayer or a planeLayer.
      * @param {string} objectCRS the CRS used by the object coordinates. You probably want to use view.referenceCRS here.
      * @param {Object3D} obj the object we want to modify.

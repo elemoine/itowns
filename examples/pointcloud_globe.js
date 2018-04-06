@@ -31,7 +31,7 @@ function showPointcloud(serverUrl, fileName) {
     }
 
     // Configure Point Cloud layer
-    pointcloud = new itowns.GeometryLayer('pointcloud', view.scene);
+    pointcloud = new itowns.RootLayer('pointcloud', view.scene);
     pointcloud.file = fileName || 'infos/sources';
     pointcloud.protocol = 'potreeconverter';
     pointcloud.url = serverUrl;

@@ -4,7 +4,7 @@ import View from '../View';
 import { RENDERING_PAUSED, MAIN_LOOP_EVENTS } from '../MainLoop';
 import RendererConstant from '../../Renderer/RendererConstant';
 
-import { GeometryLayer } from '../Layer/Layer';
+import { RootLayer } from '../Layer/Layer';
 
 import { processTiledGeometryNode } from '../../Process/TiledNodeProcessing';
 import { updateLayeredMaterialNodeImagery, updateLayeredMaterialNodeElevation } from '../../Process/LayeredMaterialNodeProcessing';
@@ -14,7 +14,7 @@ import SubdivisionControl from '../../Process/SubdivisionControl';
 import Picking from '../Picking';
 
 export function createPlanarLayer(id, extent, options) {
-    const tileLayer = new GeometryLayer(id, options.object3d || new THREE.Group());
+    const tileLayer = new RootLayer(id, options.object3d || new THREE.Group());
     tileLayer.extent = extent;
     tileLayer.schemeTile = [extent];
 
