@@ -6,7 +6,6 @@ function ColorLayer(options) {
 
     Layer.call(this, options);
 
-    defineLayerProperty(this, 'frozen', false);
     defineLayerProperty(this, 'visible', true);
     defineLayerProperty(this, 'opacity', 1.0);
     defineLayerProperty(this, 'sequence', 0);

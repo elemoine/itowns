@@ -162,6 +162,7 @@ function Layer(options) {
 
     this.extent = options.extent;
     this.format = format;
+    this.frozen = options.frozen;  // "frozen" default value
     this.name = options.name;
     this.networkOptions = options.networkOptions;
     this.options = extraOptions;
@@ -179,6 +180,8 @@ function Layer(options) {
         value: options.id,
         writable: false,
     });
+
+    defineLayerProperty(this, 'frozen', false);
 }
 
 Layer.prototype = Object.create(EventDispatcher.prototype);

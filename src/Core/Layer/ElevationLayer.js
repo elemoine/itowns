@@ -1,12 +1,10 @@
-import { Layer, defineLayerProperty } from './Layer';
+import { Layer } from './Layer';
 
 
 function ElevationLayer(options) {
     options = options || {};
 
     Layer.call(this, options);
-
-    defineLayerProperty(this, 'frozen', false);
 }
 
 ElevationLayer.prototype = Object.assign(Object.create(Layer.prototype), {
