@@ -5,6 +5,8 @@ import TileVisibilityChart from './charts/TileVisibilityChart';
 import View from '../../src/Core/View';
 import ObjectRemovalHelper from '../../src/Process/ObjectRemovalHelper';
 import GeometryDebug from './GeometryDebug';
+import DebugLayer from './DebugLayer';
+
 
 function applyToNodeFirstMaterial(view, root, layerId, cb) {
     root.traverse((object) => {
@@ -159,26 +161,24 @@ export default function createTileDebugUI(datDebugTool, view, layer, debugInstan
         }
     }
 
-    View.prototype.addLayer.call(view,
-        {
-            id: obb_layer_id,
-            type: 'debug',
-            update: debugIdUpdate,
-            visible: false,
-        }, layer).then((l) => {
-            gui.add(l, 'visible').name('Bounding boxes').onChange(() => {
-                view.notifyChange(true);
-            });
+    View.prototype.addLayer.call(view, new DebugLayer({
+        id: obb_layer_id,
+        type: 'debug',
+        update: debugIdUpdate,
+        visible: false,
+    }), layer).then((l) => {
+        gui.add(l, 'visible').name('Bounding boxes').onChange(() => {
+            view.notifyChange(true);
         });
-    View.prototype.addLayer.call(view,
-        {
-            id: sb_layer_id,
-            type: 'debug',
-            update: debugIdUpdate,
-            visible: false,
-        }, layer).then((l) => {
-            gui.add(l, 'visible').name('Bounding Spheres').onChange(() => {
-                view.notifyChange(true);
-            });
+    });
+    View.prototype.addLayer.call(view, new DebugLayer({
+        id: sb_layer_id,
+        type: 'debug',
+        update: debugIdUpdate,
+        visible: false,
+    }), layer).then((l) => {
+        gui.add(l, 'visible').name('Bounding Spheres').onChange(() => {
+            view.notifyChange(true);
         });
+    });
 }
