@@ -1,8 +1,9 @@
 import { Layer } from './Layer';
-
+import { updateLayeredMaterialNodeElevation } from '../../Process/LayeredMaterialNodeProcessing';
 
 function ElevationLayer(options) {
     options = options || {};
+    options.update = updateLayeredMaterialNodeElevation;
 
     Layer.call(this, options);
 }

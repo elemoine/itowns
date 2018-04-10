@@ -1,8 +1,10 @@
 import { Layer, defineLayerProperty } from './Layer';
+import { updateLayeredMaterialNodeImagery } from '../../Process/LayeredMaterialNodeProcessing';
 
 
 function ColorLayer(options) {
     options = options || {};
+    options.update = updateLayeredMaterialNodeImagery;
 
     Layer.call(this, options);
 
