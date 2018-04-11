@@ -18,17 +18,17 @@ function hideEverythingElse(view, object, threejsLayer = 0) {
 
 const depthRGBA = new THREE.Vector4();
 // TileMesh picking support function
-function screenCoordsToNodeId(view, tileLayer, mouse) {
+function screenCoordsToNodeId(view, rootLayer, mouse) {
     const dim = view.mainLoop.gfxEngine.getWindowSize();
 
     mouse = mouse || new THREE.Vector2(Math.floor(dim.x / 2), Math.floor(dim.y / 2));
 
-    const restore = tileLayer.level0Nodes.map(n => n.pushRenderState(RendererConstant.ID));
+    const restore = rootLayer.level0Nodes.map(n => n.pushRenderState(RendererConstant.ID));
 
-    const undoHide = hideEverythingElse(view, tileLayer.object3d, tileLayer.threejsLayer);
+    const undoHide = hideEverythingElse(view, rootLayer.object3d, rootLayer.threejsLayer);
 
     const buffer = view.mainLoop.gfxEngine.renderViewToBuffer(
-        { camera: view.camera, scene: tileLayer.object3d },
+        { camera: view.camera, scene: rootLayer.object3d },
         {
             x: mouse.x,
             y: mouse.y,

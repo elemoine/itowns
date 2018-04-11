@@ -87,7 +87,7 @@
                 var menuGlobe = new GuiTools('menuDiv', view);
                 menuGlobe.addImageryLayersGUI(view.getLayers(function (l) { return l.type === 'color'; }));
                 var d = new debug.Debug(view, menuGlobe.gui);
-                debug.createTileDebugUI(menuGlobe.gui, view, view.tileLayer, d);
+                debug.createTileDebugUI(menuGlobe.gui, view, view.rootLayer, d);
             }
         </script>
     </body>

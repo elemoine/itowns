@@ -11,7 +11,7 @@ var index;
 var wms;
 var obj;
 var offset;
-var tileLayer;
+var planarLayer;
 
 var wmsLayers = [
     'fpc_fond_plan_communaut.fpcilot',
@@ -90,10 +90,10 @@ for (index = 0; index < wmsLayers.length; index++) {
     parent.add(obj);
     obj.updateMatrixWorld(true);
 
-    tileLayer = itowns.createPlanarLayer('planar' + wms + index, extent, { object3d: obj });
-    tileLayer.disableSkirt = true;
+    planarLayer = itowns.createPlanarLayer('planar' + wms + index, extent, { object3d: obj });
+    planarLayer.disableSkirt = true;
 
-    view.addLayer(tileLayer);
+    view.addLayer(planarLayer);
 
     view.addLayer(new itowns.ColorLayer({
         update: itowns.updateLayeredMaterialNodeImagery,
@@ -105,7 +105,7 @@ for (index = 0; index < wmsLayers.length; index++) {
         name: wms,
         projection: 'EPSG:3946',
         format: 'image/jpeg',
-    }), tileLayer);
+    }), planarLayer);
 
     view.addLayer(new itowns.ElevationLayer({
         update: itowns.updateLayeredMaterialNodeElevation,
@@ -118,10 +118,10 @@ for (index = 0; index < wmsLayers.length; index++) {
         projection: 'EPSG:3946',
         heightMapWidth: 256,
         format: 'image/jpeg',
-    }), tileLayer);
+    }), planarLayer);
 
     // Since the elevation layer use color textures, specify min/max z
-    tileLayer.materialOptions = {
+    planarLayer.materialOptions = {
         useColorTextureElevation: true,
         colorTextureElevationMinZ: -600,
         colorTextureElevationMaxZ: 400,

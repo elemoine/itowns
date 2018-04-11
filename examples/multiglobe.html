@@ -75,12 +75,12 @@
             // define pole texture
             globe2.noTextureColor = new itowns.THREE.Color(0xd0d5d8);
 
-            // add globe2 to the view so it gets updated
-            itowns.View.prototype.addLayer.call(globeView, globe2);
+            // add it to the view so it gets updated
+            globeView.addLayer(globe2);
             itowns.Fetcher.json('./layers/JSONLayers/OPENSM.json').then(function _(layerOptions) {
                 layerOptions.update = itowns.updateLayeredMaterialNodeImagery;
                 var osmLayer = new itowns.ColorLayer(layerOptions);
-                itowns.View.prototype.addLayer.call(globeView, osmLayer, globe2);
+                globeView.addLayer(osmLayer, globe2);
             });
 
             // Globe animation

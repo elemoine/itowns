@@ -31,7 +31,7 @@ function Debug(view, datDebugTool, chartDivContainer) {
     this.charts.push(new ThreeStatsChart('three-info', view.mainLoop.gfxEngine.renderer));
 
     const charts = this.charts;
-    const tileLayer = view.tileLayer || view.wgs84TileLayer || view.baseLayer;
+    const rootLayer = view.rootLayer;
 
     function debugChartUpdate(updateDuration) {
         const displayed = chartDivContainer.style.display != 'none';
@@ -67,7 +67,7 @@ function Debug(view, datDebugTool, chartDivContainer) {
     });
 
     gui.add(state, 'freeze').name('freeze update').onChange((newValue) => {
-        tileLayer.frozen = newValue;
+        rootLayer.frozen = newValue;
         view.notifyChange(true);
     });
 
@@ -139,7 +139,7 @@ function Debug(view, datDebugTool, chartDivContainer) {
             const size = { x: g.width * 0.2, y: g.height * 0.2 };
             debugCamera.aspect = size.x / size.y;
             const camera = view.camera.camera3D;
-            const coord = new Coordinates(view.referenceCrs, camera.position).as(tileLayer.extent._crs);
+            const coord = new Coordinates(view.referenceCrs, camera.position).as(rootLayer.extent._crs);
             if (view instanceof PanoramaView) {
                 debugCamera.position.set(0, 0, 100);
                 camera.localToWorld(debugCamera.position);
@@ -166,7 +166,7 @@ function Debug(view, datDebugTool, chartDivContainer) {
                 view.atmosphere.visible = false;
             }
             fogDistance = 10e10;
-            for (const obj of tileLayer.level0Nodes) {
+            for (const obj of rootLayer.level0Nodes) {
                 obj.traverseVisible(updateFogDistance);
             }
             helper.visible = true;
@@ -186,7 +186,7 @@ function Debug(view, datDebugTool, chartDivContainer) {
                 view.atmosphere.visible = true;
             }
             fogDistance = view.fogDistance;
-            for (const obj of tileLayer.level0Nodes) {
+            for (const obj of rootLayer.level0Nodes) {
                 obj.traverseVisible(updateFogDistance);
             }
         }

@@ -86,13 +86,13 @@ export function createGlobeLayer(id, options) {
         }
     };
 
-    const wgs84TileLayer = new RootLayer(id, options.object3d || new THREE.Group());
-    wgs84TileLayer.schemeTile = globeSchemeTileWMTS(globeSchemeTile1);
-    wgs84TileLayer.extent = wgs84TileLayer.schemeTile[0].clone();
-    for (let i = 1; i < wgs84TileLayer.schemeTile.length; i++) {
-        wgs84TileLayer.extent.union(wgs84TileLayer.schemeTile[i]);
+    const rootLayer = new RootLayer(id, options.object3d || new THREE.Group());
+    rootLayer.schemeTile = globeSchemeTileWMTS(globeSchemeTile1);
+    rootLayer.extent = rootLayer.schemeTile[0].clone();
+    for (let i = 1; i < rootLayer.schemeTile.length; i++) {
+        rootLayer.extent.union(rootLayer.schemeTile[i]);
     }
-    wgs84TileLayer.preUpdate = (context, layer, changeSources) => {
+    rootLayer.preUpdate = (context, layer, changeSources) => {
         SubdivisionControl.preUpdate(context, layer);
 
         if (__DEBUG__) {
@@ -145,20 +145,20 @@ export function createGlobeLayer(id, options) {
         return false;
     }
 
-    wgs84TileLayer.update = processTiledGeometryNode(globeCulling(2), subdivision);
-    wgs84TileLayer.builder = new BuilderEllipsoidTile();
-    wgs84TileLayer.onTileCreated = nodeInitFn;
-    wgs84TileLayer.type = 'geometry';
-    wgs84TileLayer.protocol = 'tile';
-    wgs84TileLayer.visible = true;
-    wgs84TileLayer.lighting = {
+    rootLayer.update = processTiledGeometryNode(globeCulling(2), subdivision);
+    rootLayer.builder = new BuilderEllipsoidTile();
+    rootLayer.onTileCreated = nodeInitFn;
+    rootLayer.type = 'geometry';
+    rootLayer.protocol = 'tile';
+    rootLayer.visible = true;
+    rootLayer.lighting = {
         enable: false,
         position: { x: -0.5, y: 0.0, z: 1.0 },
     };
     // provide custom pick function
-    wgs84TileLayer.pickObjectsAt = (_view, mouse) => Picking.pickTilesAt(_view, mouse, wgs84TileLayer);
+    rootLayer.pickObjectsAt = (_view, mouse) => Picking.pickTilesAt(_view, mouse, rootLayer);
 
-    return wgs84TileLayer;
+    return rootLayer;
 }
 
 /**
@@ -192,14 +192,14 @@ function GlobeView(viewerDiv, coordCarto, options = {}) {
     this.camera.camera3D.updateProjectionMatrix();
     this.camera.camera3D.updateMatrixWorld(true);
 
-    const wgs84TileLayer = createGlobeLayer('globe', options);
+    const rootLayer = createGlobeLayer('globe', options);
 
     const sun = new THREE.DirectionalLight();
     sun.position.set(-0.5, 0, 1);
     sun.updateMatrixWorld(true);
-    wgs84TileLayer.object3d.add(sun);
+    rootLayer.object3d.add(sun);
 
-    this.addLayer(wgs84TileLayer);
+    this.addLayer(rootLayer);
 
     // Atmosphere
     this.atmosphere = new Atmosphere();
@@ -208,7 +208,7 @@ function GlobeView(viewerDiv, coordCarto, options = {}) {
     this.atmosphere.traverse((obj) => { obj.layers.set(atmosphereLayer); });
     this.camera.camera3D.layers.enable(atmosphereLayer);
 
-    wgs84TileLayer.object3d.add(this.atmosphere);
+    rootLayer.object3d.add(this.atmosphere);
     this.atmosphere.updateMatrixWorld(true);
 
 
@@ -242,9 +242,9 @@ function GlobeView(viewerDiv, coordCarto, options = {}) {
             this._fullSizeDepthBuffer = null;
         }
         const v = new THREE.Vector3();
-        v.setFromMatrixPosition(wgs84TileLayer.object3d.matrixWorld);
+        v.setFromMatrixPosition(rootLayer.object3d.matrixWorld);
         var len = v.distanceTo(this.camera.camera3D.position);
-        v.setFromMatrixScale(wgs84TileLayer.object3d.matrixWorld);
+        v.setFromMatrixScale(rootLayer.object3d.matrixWorld);
 
         // TODO: may be move in camera update
         // Compute fog distance, this function makes it possible to have a shorter distance
@@ -266,7 +266,7 @@ function GlobeView(viewerDiv, coordCarto, options = {}) {
         }
     });
 
-    this.wgs84TileLayer = wgs84TileLayer;
+    this.rootLayer = rootLayer;
 
     const fn = () => {
         this.mainLoop.removeEventListener(VIEW_EVENTS.LAYERS_INITIALIZED, fn);
@@ -281,7 +281,7 @@ function GlobeView(viewerDiv, coordCarto, options = {}) {
 GlobeView.prototype = Object.create(View.prototype);
 GlobeView.prototype.constructor = GlobeView;
 
-GlobeView.prototype.addLayer = function addLayer(layer) {
+GlobeView.prototype.addLayer = function addLayer(layer, parentLayer) {
     if (layer.type == 'color') {
         const colorLayerCount = this.getLayers(l => l.type === 'color').length;
         layer.sequence = colorLayerCount;
@@ -291,7 +291,7 @@ GlobeView.prototype.addLayer = function addLayer(layer) {
         }
     }
     const layerId = layer.id;
-    const layerPromise = View.prototype.addLayer.call(this, layer, this.wgs84TileLayer);
+    const layerPromise = View.prototype.addLayer.call(this, layer, parentLayer);
 
     this.dispatchEvent({
         type: GLOBE_VIEW_EVENTS.LAYER_ADDED,
@@ -310,14 +310,14 @@ GlobeView.prototype.addLayer = function addLayer(layer) {
  */
 GlobeView.prototype.removeLayer = function removeImageryLayer(layerId) {
     const layer = this.getLayers(l => l.id === layerId)[0];
-    if (layer && layer.type === 'color' && this.wgs84TileLayer.detach(layer)) {
+    if (layer && layer.type === 'color' && this.rootLayer.detach(layer)) {
         var cO = function cO(object) {
             if (object.removeColorLayer) {
                 object.removeColorLayer(layerId);
             }
         };
 
-        for (const root of this.wgs84TileLayer.level0Nodes) {
+        for (const root of this.rootLayer.level0Nodes) {
             root.traverse(cO);
         }
         const imageryLayers = this.getLayers(l => l.type === 'color');
@@ -340,10 +340,10 @@ GlobeView.prototype.removeLayer = function removeImageryLayer(layerId) {
 };
 
 GlobeView.prototype.selectNodeAt = function selectNodeAt(mouse) {
-    const picked = this.wgs84TileLayer.pickObjectsAt(this, mouse);
+    const picked = this.rootLayer.pickObjectsAt(this, mouse);
     const selectedId = picked.length ? picked[0].object.id : undefined;
 
-    for (const n of this.wgs84TileLayer.level0Nodes) {
+    for (const n of this.rootLayer.level0Nodes) {
         n.traverse((node) => {
             // only take of selectable nodes
             if (node.setSelected) {
@@ -362,7 +362,7 @@ GlobeView.prototype.selectNodeAt = function selectNodeAt(mouse) {
 
 GlobeView.prototype.readDepthBuffer = function readDepthBuffer(x, y, width, height) {
     const g = this.mainLoop.gfxEngine;
-    const restore = this.wgs84TileLayer.level0Nodes.map(n => n.pushRenderState(RendererConstant.DEPTH));
+    const restore = this.rootLayer.level0Nodes.map(n => n.pushRenderState(RendererConstant.DEPTH));
     const buffer = g.renderViewToBuffer(this, { x, y, width, height });
     restore.forEach(r => r());
 
@@ -386,7 +386,7 @@ GlobeView.prototype.getPickingPositionFromDepth = function getPickingPositionFro
     mouse.y = Math.floor(mouse.y);
 
     const prev = camera.layers.mask;
-    camera.layers.mask = 1 << this.wgs84TileLayer.threejsLayer;
+    camera.layers.mask = 1 << this.rootLayer.threejsLayer;
 
     // Render/Read to buffer
     let buffer;
@@ -434,7 +434,7 @@ GlobeView.prototype.setRealisticLightingOn = function setRealisticLightingOn(val
 
     this.lightingPos = coSun.normalize();
 
-    const lighting = this.wgs84TileLayer.lighting;
+    const lighting = this.rootLayer.lighting;
     lighting.enable = value;
     lighting.position = coSun;
 
@@ -454,7 +454,7 @@ GlobeView.prototype.setLightingPos = function setLightingPos(pos) {
 };
 
 GlobeView.prototype.updateMaterialUniform = function updateMaterialUniform(uniformName, value) {
-    for (const n of this.wgs84TileLayer.level0Nodes) {
+    for (const n of this.rootLayer.level0Nodes) {
         n.traverse((obj) => {
             if (!obj.material || !obj.material.uniforms) {
                 return;

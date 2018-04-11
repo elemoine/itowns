@@ -80,6 +80,7 @@ function View(crs, viewerDiv, options = {}) {
     }, false);
 
     this._changeSources = new Set();
+    this.rootLayer = null;
 
     if (__DEBUG__) {
         this.isDebugMode = true;
@@ -242,6 +243,10 @@ View.prototype.addLayer = function addLayer(layer, parentLayer) {
     const duplicate = this.getLayers((l => l.id == layer.id));
     if (duplicate.length > 0) {
         throw new Error(`Invalid id '${layer.id}': id already used`);
+    }
+
+    if (!parentLayer && !(layer instanceof RootLayer)) {
+        parentLayer = this.rootLayer;
     }
 
     if (parentLayer && !layer.extent) {

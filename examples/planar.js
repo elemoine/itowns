@@ -21,7 +21,7 @@ viewerDiv = document.getElementById('viewerDiv');
 // Instanciate PlanarView*
 view = new itowns.PlanarView(viewerDiv, extent, { renderer: renderer });
 setupLoadingScreen(viewerDiv, view);
-view.tileLayer.disableSkirt = true;
+view.rootLayer.disableSkirt = true;
 
 // Add an WMS imagery layer (see WMSProvider* for valid options)
 view.addLayer(new itowns.ColorLayer({
@@ -51,7 +51,7 @@ view.addLayer(new itowns.ElevationLayer({
     format: 'image/jpeg',
 }));
 // Since the elevation layer use color textures, specify min/max z
-view.tileLayer.materialOptions = {
+view.rootLayer.materialOptions = {
     useColorTextureElevation: true,
     colorTextureElevationMinZ: 37,
     colorTextureElevationMaxZ: 240,

@@ -13,9 +13,9 @@ import SubdivisionControl from '../../Process/SubdivisionControl';
 import Picking from '../Picking';
 
 export function createPlanarLayer(id, extent, options) {
-    const tileLayer = new RootLayer(id, options.object3d || new THREE.Group());
-    tileLayer.extent = extent;
-    tileLayer.schemeTile = [extent];
+    const rootLayer = new RootLayer(id, options.object3d || new THREE.Group());
+    rootLayer.extent = extent;
+    rootLayer.schemeTile = [extent];
 
     // Configure tiles
     const nodeInitFn = function nodeInitFn(layer, parent, node) {
@@ -32,7 +32,7 @@ export function createPlanarLayer(id, extent, options) {
         }
     };
 
-    tileLayer.preUpdate = (context, layer, changeSources) => {
+    rootLayer.preUpdate = (context, layer, changeSources) => {
         SubdivisionControl.preUpdate(context, layer);
 
         prePlanarUpdate(context, layer);
@@ -86,20 +86,20 @@ export function createPlanarLayer(id, extent, options) {
         return false;
     }
 
-    tileLayer.update = processTiledGeometryNode(planarCulling, subdivision);
-    tileLayer.builder = new PlanarTileBuilder();
-    tileLayer.onTileCreated = nodeInitFn;
-    tileLayer.type = 'geometry';
-    tileLayer.protocol = 'tile';
-    tileLayer.visible = true;
-    tileLayer.lighting = {
+    rootLayer.update = processTiledGeometryNode(planarCulling, subdivision);
+    rootLayer.builder = new PlanarTileBuilder();
+    rootLayer.onTileCreated = nodeInitFn;
+    rootLayer.type = 'geometry';
+    rootLayer.protocol = 'tile';
+    rootLayer.visible = true;
+    rootLayer.lighting = {
         enable: false,
         position: { x: -0.5, y: 0.0, z: 1.0 },
     };
     // provide custom pick function
-    tileLayer.pickObjectsAt = (_view, mouse) => Picking.pickTilesAt(_view, mouse, tileLayer);
+    rootLayer.pickObjectsAt = (_view, mouse) => Picking.pickTilesAt(_view, mouse, rootLayer);
 
-    return tileLayer;
+    return rootLayer;
 }
 
 function PlanarView(viewerDiv, extent, options = {}) {
@@ -122,9 +122,9 @@ function PlanarView(viewerDiv, extent, options = {}) {
     this.camera.camera3D.updateProjectionMatrix();
     this.camera.camera3D.updateMatrixWorld(true);
 
-    const tileLayer = createPlanarLayer('planar', extent, options);
+    const rootLayer = createPlanarLayer('planar', extent, options);
 
-    this.addLayer(tileLayer);
+    this.addLayer(rootLayer);
 
     this._renderState = RendererConstant.FINAL;
     this._fullSizeDepthBuffer = null;
@@ -135,21 +135,17 @@ function PlanarView(viewerDiv, extent, options = {}) {
         }
     });
 
-    this.tileLayer = tileLayer;
+    this.rootLayer = rootLayer;
 }
 
 PlanarView.prototype = Object.create(View.prototype);
 PlanarView.prototype.constructor = PlanarView;
 
-PlanarView.prototype.addLayer = function addLayer(layer) {
-    return View.prototype.addLayer.call(this, layer, this.tileLayer);
-};
-
 PlanarView.prototype.selectNodeAt = function selectNodeAt(mouse) {
-    const picked = this.tileLayer.pickObjectsAt(this, mouse);
+    const picked = this.rootLayer.pickObjectsAt(this, mouse);
     const selectedId = picked.length ? picked[0].object.id : undefined;
 
-    for (const n of this.tileLayer.level0Nodes) {
+    for (const n of this.rootLayer.level0Nodes) {
         n.traverse((node) => {
             // only take of selectable nodes
             if (node.setSelected) {
@@ -169,7 +165,7 @@ PlanarView.prototype.selectNodeAt = function selectNodeAt(mouse) {
 
 PlanarView.prototype.readDepthBuffer = function readDepthBuffer(x, y, width, height) {
     const g = this.mainLoop.gfxEngine;
-    const restoreState = this.tileLayer.level0Nodes[0].pushRenderState(RendererConstant.DEPTH);
+    const restoreState = this.rootLayer.level0Nodes[0].pushRenderState(RendererConstant.DEPTH);
     const buffer = g.renderViewToBuffer(this, { x, y, width, height });
     restoreState();
     return buffer;
@@ -193,7 +189,7 @@ PlanarView.prototype.getPickingPositionFromDepth = function getPickingPositionFr
 
     // Prepare state
     const prev = camera.layers.mask;
-    camera.layers.mask = 1 << this.tileLayer.threejsLayer;
+    camera.layers.mask = 1 << this.rootLayer.threejsLayer;
 
      // Render/Read to buffer
     let buffer;

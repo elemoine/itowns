@@ -45,7 +45,7 @@ function altitudeLine(properties, contour) {
     var i = 0;
     var result;
     var tile;
-    var layer = globeView.wgs84TileLayer;
+    var layer = globeView.rootLayer;
     if (contour.length && contour.length > 0) {
         for (; i < contour.length; i++) {
             result = itowns.DEMUtils.getElevationValueAt(layer, contour[i], 0, tile);
@@ -182,7 +182,7 @@ function altitudePoint(properties, contour) {
     var result;
     var z = 0;
     if (contour.length && contour.length > 0) {
-        result = itowns.DEMUtils.getElevationValueAt(globeView.wgs84TileLayer, contour[0]);
+        result = itowns.DEMUtils.getElevationValueAt(globeView.rootLayer, contour[0]);
         if (result) {
             z = result.z;
         }

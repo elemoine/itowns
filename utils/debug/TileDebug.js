@@ -2,7 +2,6 @@ import * as THREE from 'three';
 import OBBHelper from './OBBHelper';
 import TileObjectChart from './charts/TileObjectChart';
 import TileVisibilityChart from './charts/TileVisibilityChart';
-import View from '../../src/Core/View';
 import ObjectRemovalHelper from '../../src/Process/ObjectRemovalHelper';
 import GeometryDebug from './GeometryDebug';
 import DebugLayer from './DebugLayer';
@@ -161,7 +160,7 @@ export default function createTileDebugUI(datDebugTool, view, layer, debugInstan
         }
     }
 
-    View.prototype.addLayer.call(view, new DebugLayer({
+    view.addLayer(new DebugLayer({
         id: obb_layer_id,
         type: 'debug',
         update: debugIdUpdate,
@@ -171,7 +170,7 @@ export default function createTileDebugUI(datDebugTool, view, layer, debugInstan
             view.notifyChange(true);
         });
     });
-    View.prototype.addLayer.call(view, new DebugLayer({
+    view.addLayer(new DebugLayer({
         id: sb_layer_id,
         type: 'debug',
         update: debugIdUpdate,

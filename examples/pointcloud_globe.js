@@ -63,7 +63,7 @@ function showPointcloud(serverUrl, fileName) {
         window.view = view;
     }
 
-    itowns.View.prototype.addLayer.call(view, pointcloud).then(onLayerReady);
+    view.addLayer(pointcloud).then(onLayerReady);
 
     itowns.Fetcher.json('./layers/JSONLayers/IGN_MNT_HIGHRES.json').then(addLayerCb);
     itowns.Fetcher.json('./layers/JSONLayers/Ortho.json').then(addLayerCb);

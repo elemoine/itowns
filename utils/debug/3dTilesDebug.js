@@ -1,6 +1,5 @@
 import * as THREE from 'three';
 import OBBHelper from './OBBHelper';
-import View from '../../src/Core/View';
 import GeometryDebug from './GeometryDebug';
 import DebugLayer from './DebugLayer';
 
@@ -91,7 +90,7 @@ export default function create3dTilesDebugUI(datDebugTool, view, layer) {
         }
     };
 
-    View.prototype.addLayer.call(view, new DebugLayer({
+    view.addLayer(new DebugLayer({
         id: obb_layer_id,
         type: 'debug',
         update: debugIdUpdate,

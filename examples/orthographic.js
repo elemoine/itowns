@@ -43,7 +43,7 @@ setupLoadingScreen(viewerDiv, view);
 
 // By default itowns' tiles geometry have a "skirt" (ie they have a height),
 // but in case of orthographic we don't need this feature, so disable it
-view.tileLayer.disableSkirt = true;
+view.rootLayer.disableSkirt = true;
 
 // Add an TMS imagery layer
 view.addLayer(new itowns.ColorLayer({

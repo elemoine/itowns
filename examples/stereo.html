@@ -124,7 +124,7 @@
             var divScaleWidget = document.querySelectorAll('.divScaleWidget')[0];
 
             var d = new debug.Debug(globeView, menuGlobe.gui);
-            debug.createTileDebugUI(menuGlobe.gui, globeView, globeView.wgs84TileLayer, d);
+            debug.createTileDebugUI(menuGlobe.gui, globeView, globeView.rootLayer, d);
 
             function updateScaleWidget() {
                 var value = globeView.controls.pixelsToMeters(200);

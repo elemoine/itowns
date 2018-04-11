@@ -12,15 +12,15 @@ import ProjectionType from './Panorama/Constants';
 import Picking from '../Picking';
 
 export function createPanoramaLayer(id, coordinates, type, options = {}) {
-    const tileLayer = new RootLayer(id, options.object3d || new THREE.Group());
+    const rootLayer = new RootLayer(id, options.object3d || new THREE.Group());
 
-    coordinates.xyz(tileLayer.object3d.position);
-    tileLayer.object3d.quaternion.setFromUnitVectors(
+    coordinates.xyz(rootLayer.object3d.position);
+    rootLayer.object3d.quaternion.setFromUnitVectors(
         new THREE.Vector3(0, 0, 1), coordinates.geodesicNormal);
-    tileLayer.object3d.updateMatrixWorld(true);
+    rootLayer.object3d.updateMatrixWorld(true);
 
     // FIXME: add CRS = '0' support
-    tileLayer.extent = new Extent('EPSG:4326', {
+    rootLayer.extent = new Extent('EPSG:4326', {
         west: -180,
         east: 180,
         north: 90,
@@ -29,7 +29,7 @@ export function createPanoramaLayer(id, coordinates, type, options = {}) {
 
     if (type === ProjectionType.SPHERICAL) {
         // equirectangular -> spherical geometry
-        tileLayer.schemeTile = [
+        rootLayer.schemeTile = [
             new Extent('EPSG:4326', {
                 west: -180,
                 east: 0,
@@ -43,7 +43,7 @@ export function createPanoramaLayer(id, coordinates, type, options = {}) {
             })];
     } else if (type === ProjectionType.CYLINDRICAL) {
         // cylindrical geometry
-        tileLayer.schemeTile = [
+        rootLayer.schemeTile = [
             new Extent('EPSG:4326', {
                 west: -180,
                 east: -90,
@@ -69,7 +69,7 @@ export function createPanoramaLayer(id, coordinates, type, options = {}) {
         throw new Error(`Unsupported panorama projection type ${type}.
             Only ProjectionType.SPHERICAL and ProjectionType.CYLINDRICAL are supported`);
     }
-    tileLayer.disableSkirt = true;
+    rootLayer.disableSkirt = true;
 
     // Configure tiles
     const nodeInitFn = function nodeInitFn(layer, parent, node) {
@@ -84,7 +84,7 @@ export function createPanoramaLayer(id, coordinates, type, options = {}) {
         }
     };
 
-    tileLayer.preUpdate = (context, layer, changeSources) => {
+    rootLayer.preUpdate = (context, layer, changeSources) => {
         SubdivisionControl.preUpdate(context, layer);
 
         if (__DEBUG__) {
@@ -136,23 +136,23 @@ export function createPanoramaLayer(id, coordinates, type, options = {}) {
         return false;
     }
 
-    tileLayer.update = processTiledGeometryNode(panoramaCulling, subdivision);
-    tileLayer.builder = new PanoramaTileBuilder(type, options.ratio);
-    tileLayer.onTileCreated = nodeInitFn;
-    tileLayer.type = 'geometry';
-    tileLayer.protocol = 'tile';
-    tileLayer.visible = true;
-    tileLayer.segments = 8;
-    tileLayer.quality = 0.5;
-    tileLayer.lighting = {
+    rootLayer.update = processTiledGeometryNode(panoramaCulling, subdivision);
+    rootLayer.builder = new PanoramaTileBuilder(type, options.ratio);
+    rootLayer.onTileCreated = nodeInitFn;
+    rootLayer.type = 'geometry';
+    rootLayer.protocol = 'tile';
+    rootLayer.visible = true;
+    rootLayer.segments = 8;
+    rootLayer.quality = 0.5;
+    rootLayer.lighting = {
         enable: false,
         position: { x: -0.5, y: 0.0, z: 1.0 },
     };
     // provide custom pick function
-    tileLayer.pickObjectsAt = (_view, mouse) => Picking.pickTilesAt(_view, mouse, tileLayer);
+    rootLayer.pickObjectsAt = (_view, mouse) => Picking.pickTilesAt(_view, mouse, rootLayer);
 
 
-    return tileLayer;
+    return rootLayer;
 }
 
 function PanoramaView(viewerDiv, coordinates, type, options = {}) {
@@ -177,21 +177,21 @@ function PanoramaView(viewerDiv, coordinates, type, options = {}) {
     }
     camera.updateMatrixWorld();
 
-    const tileLayer = createPanoramaLayer('panorama', coordinates, type, options);
+    const rootLayer = createPanoramaLayer('panorama', coordinates, type, options);
 
-    View.prototype.addLayer.call(this, tileLayer);
+    View.prototype.addLayer.call(this, rootLayer);
 
-    this.baseLayer = tileLayer;
+    this.rootLayer = rootLayer;
 }
 
 PanoramaView.prototype = Object.create(View.prototype);
 PanoramaView.prototype.constructor = PanoramaView;
 
-PanoramaView.prototype.addLayer = function addLayer(layer) {
-    if (layer.type != 'color') {
+PanoramaView.prototype.addLayer = function addLayer(layer, parentLayer) {
+    if (!(layer instanceof RootLayer) && layer.type != 'color') {
         throw new Error(`Unsupported layer type ${layer.type} (PanoramaView only support 'color' layers)`);
     }
-    return View.prototype.addLayer.call(this, layer, this.baseLayer);
+    return View.prototype.addLayer.call(this, layer, parentLayer);
 };
 
 export default PanoramaView;

@@ -24,7 +24,7 @@ describe('wmts', function () {
             } else if (initialState < 5) {
                 initialState++;
             } else {
-                for (var obj of example.view.wgs84TileLayer.level0Nodes) {
+                for (var obj of example.view.rootLayer.level0Nodes) {
                     itownsTesting.countVisibleAndDisplayedLayerImage(obj, 'Ortho');
                 }
                 assert.equal(layer.options.zoom.max, itownsTesting.counters.visible_at_level.length - 1);

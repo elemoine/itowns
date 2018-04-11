@@ -10,7 +10,7 @@ describe('Planar example', function () {
             }
             itownsTesting.counters.displayed_at_level = [];
 
-            for (var obj of example.view.tileLayer.level0Nodes) {
+            for (var obj of example.view.rootLayer.level0Nodes) {
                 itownsTesting.countVisibleAndDisplayed(obj);
             }
 
